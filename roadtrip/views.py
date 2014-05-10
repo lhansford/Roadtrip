@@ -1,10 +1,19 @@
-from flask import render_template
+from flask import render_template, redirect, url_for, flash, request, session, g
+from flask.ext.security import login_required, current_user
 
-from roadtrip import app
+from roadtrip import app, db, user_datastore
+from roadtrip.models import User
 
 @app.route('/')
+@app.route('/index')
+@login_required
 def index():
-    return render_template("index.html")
+	return render_template("index.html", user=current_user, title="Home")
+
+@app.route('/signup')
+def signup():
+	""" Create a new account. """
+	pass
 
 @app.route('/newtrip')
 def new_trip():
@@ -30,4 +39,3 @@ def upload_image(trip, day=None):
 def delete_image(image):
 	""" Delete a particular image"""
 	pass
-
