@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<form action="" method="post" name="trip">
+{{form.hidden_tag()}}
+<p>{{ form.name(placeholder="Trip Name", maxlength="255") }}</p>
+<p>{{ form.start_date() }}</p>
+<p>{{ form.start_location(placeholder="Start Location") }}</p>
+<input type="submit" value="Create">
+</form>
+{% endblock %}
