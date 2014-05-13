@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1>{{ trip.name }}</h1>
+	{% for day in days %}
+		<h4>Day {{ day.num }} - {{ day.date }}</h4>
+		<ol>
+		{% for location in day.locations %}
+			<li>{{ location.name }}</li>
+		{% endfor %}
+		</ol>
+	{% endfor %}
+	<button id="addDay">Add day</button>
+	<script type="text/javascript">
+	$("#addDay").click(addDay);
+	function addDay(){
+		var url = '/trip/' + {{ trip.id }} + '/_add_day';
+		$.getJSON(url, function (data){
+			console.log(data);
+		});
+	}
+	</script>
+{% endblock %}

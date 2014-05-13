@@ -1,10 +1,27 @@
 {% extends "base.html" %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="/static/css/pikaday.css">
+{% endblock %}
+
 {% block content %}
 <form action="" method="post" name="trip">
 {{form.hidden_tag()}}
+<p><label for="name">Trip Name</label></p>
 <p>{{ form.name(placeholder="Trip Name", maxlength="255") }}</p>
+<p><label for="start_date">Date</label></p>
 <p>{{ form.start_date() }}</p>
+<p><label for="start_location">Start Location</label></p>
 <p>{{ form.start_location(placeholder="Start Location") }}</p>
 <input type="submit" value="Create">
 </form>
+
+<script src="/static/js/pikaday.js"></script>
+<script type="text/javascript">
+    var today = new Date();
+
+    var picker = new Pikaday({ 
+        field: document.getElementById('start_date')
+    });
+</script>
 {% endblock %}

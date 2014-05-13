@@ -5,6 +5,9 @@
     {% else %}
     <title>NO TITLE BRO</title>
     {% endif %}
+    {% block css %}{% endblock %}
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    {% block js %}{% endblock %}
   </head>
   <body>
     <div><a href="/index">Home</a></div>

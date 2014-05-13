@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block js %}
+<script type="text/javascript" src="/static/js/sortable.min.js"></script>
+{% endblock %}
+{% block content %}
+	<h1>{{ trip.name }} - Day {{ day_num }}</h1>
+	<ul id="locations">
+	{% for location in locations %}
+			<li>{{ location.name }}</li>
+	{% endfor %}
+	</ul>
+	<input id="location-input"></input>
+	<button id="add-location">Add Location</button>
+	<script type="text/javascript">
+	var locationsList = document.getElementById("locations");
+	new Sortable(locationsList);
+
+	$("#add-location").click(addLocation);
+	function addLocation(){
+		var location = $("#location-input").val();
+		var url = '/trip/' + {{ trip.id }} + '/' + {{ day_num }} + '/_add/' + location;
+		$.getJSON(url, function (data){
+			console.log(data);
+		});
+	}
+	</script>
+{% endblock %}

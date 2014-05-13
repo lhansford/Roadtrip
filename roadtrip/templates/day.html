@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block css %}
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+<style type="text/css">
+#map { height: 480px; }
+</style>
+{% endblock %}
+{% block js %}
+ <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+{% endblock %}
+{% block content %}
+	<h1>{{ trip.name }} - Day {{ day_num }}</h1>
+	<div id="map"></div>
+	<script type="text/javascript">
+	// create a map in the "map" div, set the view to a given place and zoom
+	var locations = {{ locations | safe }};
+	var map = L.map('map').setView([0, 0], 3);
+	// add an OpenStreetMap tile layer
+	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+	    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+	}).addTo(map);
+
+	for(var i = 0; i < locations.length; i++ ){
+		var l = locations[i];
+		createMarker(l.latitude, l.longitude, l.name);
+	}
+
+	function createMarker(lat, lng, name){
+		L.marker([lat, lng]).addTo(map)
+	    .bindPopup(name)
+	    .openPopup();
+	}
+	</script>
+{% endblock %}
