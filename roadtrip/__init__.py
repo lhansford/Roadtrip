@@ -16,7 +16,7 @@ app.config['SECURITY_SEND_REGISTER_EMAIL'] = False
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-bcrypt = Bcrypt(app)
+# bcrypt = Bcrypt(app)
 app.config['SECURITY_PASSWORD_HASH'] = 'bcrypt'
 app.config['SECURITY_PASSWORD_SALT'] = 'bcrypt'
 

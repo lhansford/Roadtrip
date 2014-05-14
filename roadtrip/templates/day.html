@@ -7,6 +7,7 @@
 {% endblock %}
 {% block js %}
  <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+ <script src="/static/js/leaflet-providers.js"></script>
 {% endblock %}
 {% block content %}
 	<h1>{{ trip.name }} - Day {{ day_num }}</h1>
@@ -14,12 +15,19 @@
 	<script type="text/javascript">
 	// create a map in the "map" div, set the view to a given place and zoom
 	var locations = {{ locations | safe }};
+	var route = {{ route | tojson }};
 	var map = L.map('map').setView([0, 0], 3);
+	L.tileLayer.provider('Stamen.Watercolor').addTo(map);
 	// add an OpenStreetMap tile layer
-	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-	    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-	}).addTo(map);
+	// L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+	//     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+	// }).addTo(map);
 
+	//Add route to map
+	if(route){
+		L.polyline(route, {color: 'red'}).addTo(map);
+	}
+	//Add location markers to map
 	for(var i = 0; i < locations.length; i++ ){
 		var l = locations[i];
 		createMarker(l.latitude, l.longitude, l.name);
