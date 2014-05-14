@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import math
+import json
 
 from flask import render_template, redirect, url_for, flash, request, session, g, jsonify
 from flask.ext.security import login_required, current_user
@@ -69,13 +70,7 @@ def day(trip_id, day_num):
 	if len(days) != day_num:
 		return "ERROR"
 	day = days[-1]
-	locations = []
-	for l in Location.query.filter_by(day=day).all():
-		d = {}
-		d['name'] = l.name
-		d['latitude'] = l.latitude
-		d['longitude'] = l.longitude
-		locations.append(d)
+	locations = [{'latitude':l.latitude, 'longitude':l.longitude} for l in Location.query.filter_by(day=day).order_by(Location.order).all()]
 	route = None
 	if len(locations) > 1:
 		route = get_route(locations)
@@ -105,7 +100,7 @@ def edit_day(trip_id, day_num):
 	if len(days) != day_num:
 		return "ERROR"
 	day = days[-1]
-	locations = Location.query.filter_by(day=day).all()
+	locations = Location.query.filter_by(day=day).order_by(Location.order).all()
 	return render_template("edit_day.html", trip=trip, day=day, day_num=day_num, locations=locations)
 
 @app.route('/trip/<int:trip_id>/_add_day')
@@ -128,8 +123,12 @@ def _add_day(trip_id):
 	db.session.add(new_day)
 	db.session.add(new_location)
 	db.session.commit()
-	# return jsonify(new_day = new_day, new_location = new_location)
-	return jsonify({"TEST":1})
+	new_data = {
+		"day": Day.query.count(),
+		"date": new_day.date,
+		"location": new_location.name
+	} 
+	return jsonify(new_data)
 
 @app.route('/trip/<int:trip_id>/<int:day_num>/_add/<location_query>')
 def _add_location(trip_id, day_num, location_query):
@@ -146,7 +145,7 @@ def _add_location(trip_id, day_num, location_query):
 		name = ' '.join(location),
 		latitude = latlng[0],
 		longitude = latlng[1],
-		order = 1,
+		order = order,
 		day = day
 	)
 	db.session.add(new_location)
@@ -154,38 +153,61 @@ def _add_location(trip_id, day_num, location_query):
 	# return jsonify(new_day = new_day, new_location = new_location)
 	return jsonify({"TEST":1})
 
+@app.route('/_remove_day/<int:trip_id>')
+def _remove_day(trip_id):
+	""" Removes the last day of a trip. """
+	trip = Trip.query.get(trip_id)
+	day = Day.query.filter_by(trip=trip).order_by(desc(Day.date)).first()
+	db.session.delete(day)
+	db.session.commit()
+	return jsonify({})
+
+@app.route('/_remove_location/<int:location_id>')
+def _remove_location(location_id):
+	""" Removes a given location from the database. """
+	location = Location.query.get(location_id)
+	db.session.delete(location)
+	db.session.commit()
+	return jsonify({})
+
+#APP ROUTE
+@app.route('/reorder_locations', methods=['POST'])
+def reorder_locations():
+	"""Takes a JSON list and sets the order for the locations in the list to the
+	same order as the list.
+	"""
+	## Convert JSON to list
+	order = 1
+	locations = request.get_json()
+	for l_id in locations:
+		location = Location.query.get(int(l_id))
+		location.order = order
+		db.session.commit()
+		order += 1
+	return "Okay"
+
 def get_location(query):
-	""" Returns the latitude and longitude of a location. Query is a comma 
-	seperated list of keywords. NEEDS IMPROVEMENT FOR 
-	MULTIPLE OPTIONS OR NO RESULT. """
-	url = "http://nominatim.openstreetmap.org/search?q=" + '+'.join(query) + '&format=json&limit=1' #Currently only get one
+	""" Returns a tuple containing the latitude and longitude of the result. 
+	Query is a comma seperated list of keywords. NEEDS IMPROVEMENT FOR 
+	MULTIPLE OPTIONS OR NO RESULT.
+	"""
+	query = '+'.join(query) + '&format=json&limit=1' #Currently only get one
+	url = "http://nominatim.openstreetmap.org/search?q=" + query	 
 	r = requests.get(url)
 	data = r.json()[0] #Get first element of list, should only be one atm.
 	return (data['lat'],data['lon'])
 
-def upload_image(trip, day=None):
-	""" Uploads image(s) to a roadtrip. A day might be specified, but if not the
-	photos are added to an unused bin.
-	"""
-	pass
-
-def delete_image(image):
-	""" Delete a particular image"""
-	pass
-
 def get_route(locations):
-	""" Returns a route between the given locations. Locations is a list of 
-	dicts where each dict contains a name, latitude, and longitude.
+	""" Returns a list of latlng tuples representing a journey. Locations is a 
+	list of dicts where each dict contains a latitude and longitude.
 	"""
-	server = "http://router.project-osrm.org/"
-	query = 'viaroute?loc='
+	url = "http://router.project-osrm.org/viaroute?loc="
 	for location in locations:
-		query += str(location['latitude'])
-		query += ','
-		query += str(location['longitude'])
-		query += '&loc='
-	query = query [:-5] #Remove last '&loc='
-	r = requests.get(server + query)
+		url += str(location['latitude'])
+		url += ','
+		url += str(location['longitude'])
+		url += '&loc='
+	r = requests.get(url[:-5]) #Remove last '&loc='
 	return decode_polyline(r.json()['route_geometry'])
 
 def decode_polyline(encoded_string):
@@ -245,4 +267,16 @@ def decode_polyline(encoded_string):
 		lon += dlon
 		output_array.append([lat*decode_precision, lon*decode_precision])
 	return output_array
+
+
+def upload_image(trip, day=None):
+	""" Uploads image(s) to a roadtrip. A day might be specified, but if not the
+	photos are added to an unused bin.
+	"""
+	pass
+
+def delete_image(image):
+	""" Delete a particular image"""
+	pass
+
 

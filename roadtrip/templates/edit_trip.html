@@ -1,22 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
 	<h1>{{ trip.name }}</h1>
-	{% for day in days %}
-		<h4>Day {{ day.num }} - {{ day.date }}</h4>
-		<ol>
-		{% for location in day.locations %}
-			<li>{{ location.name }}</li>
+	<section id="days">
+		{% for day in days %}
+			<div class="day">
+				<h4>Day {{ day.num }} - {{ day.date }}</h4>
+				<ol>
+				{% for location in day.locations %}
+					<li>{{ location.name }}</li>
+				{% endfor %}
+				</ol>
+			</div>
 		{% endfor %}
-		</ol>
-	{% endfor %}
+	</section>
 	<button id="addDay">Add day</button>
+	<button id="removeDay">Remove last day</button>
 	<script type="text/javascript">
 	$("#addDay").click(addDay);
+	$("#removeDay").click(removeDay);
+
 	function addDay(){
 		var url = '/trip/' + {{ trip.id }} + '/_add_day';
 		$.getJSON(url, function (data){
-			console.log(data);
+			var html = '<div class="day"><h4>Day ' + data.day + ' - ' + data.date +
+			 '</h4><ol><li>' + data.location + '</li></ol></div>';
+			$("#days").append(html);
 		});
 	}
+
+	function removeDay(){
+		var url = '/_remove_day/' + {{ trip.id }};
+		$.getJSON(url, function (data){
+			$(".day").last().remove();
+		});
+	}
+
 	</script>
 {% endblock %}

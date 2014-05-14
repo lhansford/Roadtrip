@@ -6,16 +6,17 @@
 	<h1>{{ trip.name }} - Day {{ day_num }}</h1>
 	<ul id="locations">
 	{% for location in locations %}
-			<li>{{ location.name }}</li>
+			<li data-id="{{ location.id }}">{{ location.name }}<button class="delete-location">x</button></li>
 	{% endfor %}
 	</ul>
 	<input id="location-input"></input>
 	<button id="add-location">Add Location</button>
 	<script type="text/javascript">
 	var locationsList = document.getElementById("locations");
-	new Sortable(locationsList);
+	new Sortable(locationsList, {onUpdate: function(event){ listSorted(event); } });
 
 	$("#add-location").click(addLocation);
+	$(".delete-location").click(deleteLocation);
 	function addLocation(){
 		var location = $("#location-input").val();
 		var url = '/trip/' + {{ trip.id }} + '/' + {{ day_num }} + '/_add/' + location;
@@ -23,5 +24,32 @@
 			console.log(data);
 		});
 	}
+
+	function deleteLocation(e){
+		console.log("clicked");
+		var locationId = $(this).parent().data("id");
+		var url = '/_remove_location/' + locationId;
+		$.getJSON(url, function (data){ //Currently doesn't return any JSON. Maybe use a different jquery call?
+			$(this).parent().remove();
+		});	
+	}
+
+	function listSorted(event){
+		// Called when the list is changed. Send new order to server to be saved.
+		console.log('change');
+		locations = [];
+		$('#locations > li').each(function(d){
+			locations.push($(this).data("id"));
+		});
+		$.ajax({
+      type: "POST",
+      url: '/reorder_locations',
+      dataType: 'json',
+      async: false,
+      data: JSON.stringify(locations),
+      contentType: "application/json; charset=utf-8",
+    })
+	}
+
 	</script>
 {% endblock %}
