@@ -22,12 +22,8 @@ def index():
 	 trips=trips,
 	 title="Home")
 
-@app.route('/signup')
-def signup():
-	""" Create a new account. """
-	pass
-
 @app.route('/newtrip', methods = ['GET', 'POST'])
+@login_required
 def new_trip():
 	""" Create a new road trip."""
 	form = TripForm(request.form)
@@ -77,9 +73,14 @@ def day(trip_id, day_num):
 	return render_template("day.html", trip=trip, day=day, day_num=day_num, locations=locations, route=route)
 
 @app.route('/trip/<int:trip_id>/edit')
+@login_required
 def edit_trip(trip_id):
 	""" Edit a given road trip. """
+
 	trip = Trip.query.get(trip_id)
+	#Redirect if not the current user
+	if current_user != trip.user:
+		return redirect('index')
 	days = Day.query.filter_by(trip=trip).order_by(Day.date).all()
 	trip_data = []
 	num = 1
@@ -93,9 +94,13 @@ def edit_trip(trip_id):
 	return render_template("edit_trip.html", trip=trip, days=trip_data)
 
 @app.route('/trip/<int:trip_id>/<int:day_num>/edit')
+@login_required
 def edit_day(trip_id, day_num):
 	""" Edit a given road trip. """
 	trip = Trip.query.get(trip_id)
+	#Redirect if not the current user
+	if current_user != trip.user:
+		return redirect('index')
 	days = Day.query.filter_by(trip=trip).order_by(Day.date).limit(day_num).all()
 	if len(days) != day_num:
 		return "ERROR"
@@ -104,9 +109,13 @@ def edit_day(trip_id, day_num):
 	return render_template("edit_day.html", trip=trip, day=day, day_num=day_num, locations=locations)
 
 @app.route('/trip/<int:trip_id>/_add_day')
+@login_required
 def _add_day(trip_id):
 	""" Add a day to a trip and return it as JSON """
 	trip = Trip.query.get(trip_id)
+	#Redirect if not the current user
+	if current_user != trip.user:
+		return redirect('index')
 	last_day = Day.query.filter_by(trip=trip).order_by(desc(Day.date)).first()
 	last_location = Location.query.filter_by(day=last_day).order_by(desc(Location.order)).first()
 	new_day = Day(
@@ -131,10 +140,14 @@ def _add_day(trip_id):
 	return jsonify(new_data)
 
 @app.route('/trip/<int:trip_id>/<int:day_num>/_add/<location_query>')
+@login_required
 def _add_location(trip_id, day_num, location_query):
 	""" Add a location to a day and return it as JSON """
 	location = location_query.split('+')
 	trip = Trip.query.get(trip_id)
+	#Redirect if not the current user
+	if current_user != trip.user:
+		return redirect('index')
 	days = Day.query.filter_by(trip=trip).order_by(Day.date).limit(day_num).all()
 	if len(days) != day_num:
 		return "ERROR"
@@ -154,24 +167,33 @@ def _add_location(trip_id, day_num, location_query):
 	return jsonify({"TEST":1})
 
 @app.route('/_remove_day/<int:trip_id>')
+@login_required
 def _remove_day(trip_id):
 	""" Removes the last day of a trip. """
 	trip = Trip.query.get(trip_id)
+	#Redirect if not the current user
+	if current_user != trip.user:
+		return redirect('index')
 	day = Day.query.filter_by(trip=trip).order_by(desc(Day.date)).first()
 	db.session.delete(day)
 	db.session.commit()
 	return jsonify({})
 
 @app.route('/_remove_location/<int:location_id>')
+@login_required
 def _remove_location(location_id):
 	""" Removes a given location from the database. """
 	location = Location.query.get(location_id)
+	#Redirect if not the current user
+	if current_user != location.day.trip.user:
+		return redirect('index')
 	db.session.delete(location)
 	db.session.commit()
 	return jsonify({})
 
 #APP ROUTE
 @app.route('/reorder_locations', methods=['POST'])
+@login_required
 def reorder_locations():
 	"""Takes a JSON list and sets the order for the locations in the list to the
 	same order as the list.
