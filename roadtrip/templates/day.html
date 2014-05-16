@@ -14,29 +14,27 @@
 	<div id="map"></div>
 	<script type="text/javascript">
 	// create a map in the "map" div, set the view to a given place and zoom
-	var locations = {{ locations | safe }};
-	var route = {{ route | tojson }};
-	var map = L.map('map').setView([0, 0], 3);
-	L.tileLayer.provider('Stamen.Watercolor').addTo(map);
-	// add an OpenStreetMap tile layer
-	// L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-	//     attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-	// }).addTo(map);
+		var locations = {{ locations | safe }};
+		var centroid = {{ centroid | tojson  }};
+		var route = {{ route | tojson }};
+		var zoom = {{ zoom }};
+		var map = L.map('map').setView(centroid, zoom);
+		L.tileLayer.provider('Stamen.Watercolor').addTo(map);
 
-	//Add route to map
-	if(route){
-		L.polyline(route, {color: 'red'}).addTo(map);
-	}
-	//Add location markers to map
-	for(var i = 0; i < locations.length; i++ ){
-		var l = locations[i];
-		createMarker(l.latitude, l.longitude, l.name);
-	}
+		//Add route to map
+		if(route){
+			L.polyline(route, {color: 'red'}).addTo(map);
+		}
 
-	function createMarker(lat, lng, name){
-		L.marker([lat, lng]).addTo(map)
-	    .bindPopup(name)
-	    .openPopup();
-	}
+		//Add location markers to map
+		for(var i = 0; i < locations.length; i++ ){
+			var l = locations[i];
+			createMarker(l.latitude, l.longitude, l.name);
+		}
+
+		function createMarker(lat, lng, name){
+			L.marker([lat, lng]).addTo(map)
+		    .bindPopup(name);
+		}
 	</script>
 {% endblock %}

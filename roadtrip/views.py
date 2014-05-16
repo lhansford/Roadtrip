@@ -65,11 +65,23 @@ def day(trip_id, day_num):
 	if len(days) != day_num:
 		return "ERROR"
 	day = days[-1]
-	locations = [{'latitude':l.latitude, 'longitude':l.longitude} for l in Location.query.filter_by(day=day).order_by(Location.order).all()]
-	route = None
+	locations = [{'latitude':l.latitude, 'longitude':l.longitude, 'name':l.name} for l in Location.query.filter_by(day=day).order_by(Location.order).all()]
 	if len(locations) > 1:
 		route = get_route(locations)
-	return render_template("day.html", trip=trip, day=day, day_num=day_num, locations=locations, route=route)
+		centroid, zoom = get_route_centroid(route)
+	else:
+		route = None
+		centroid = (locations[0]['latitude'],locations[0]['longitude'])
+		zoom = 3
+	return render_template("day.html",
+		trip=trip,
+		day=day,
+		day_num=day_num, 
+		locations=locations, 
+		route=route,
+		centroid=centroid,
+		zoom=zoom
+	)
 
 @app.route('/trip/<int:trip_id>/edit')
 @login_required
@@ -299,5 +311,21 @@ def upload_image(trip, day=None):
 def delete_image(image):
 	""" Delete a particular image"""
 	pass
+
+def get_route_centroid(route):
+	""" Returns the centroid and zoom level for the locations in route. """
+	latitudes = [l[0] for l in route]
+	longitudes = [l[1] for l in route]
+	lat = (max(latitudes) + min(latitudes)) / 2
+	lng = (max(longitudes) + min(longitudes)) / 2
+
+	#Calculate zoom level
+	difference = max([max(latitudes) - min(latitudes), max(longitudes) - min(longitudes)])
+	x = 360
+	zoom = 0
+	while difference < x:
+		x /= 2
+		zoom += 1
+	return (lat, lng), zoom
 
 
