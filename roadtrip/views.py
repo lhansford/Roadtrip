@@ -13,7 +13,6 @@ from roadtrip.models import User, Trip, Day, Location
 from roadtrip.forms import TripForm, DayForm, DestinationForm
 
 @app.route('/')
-@app.route('/index')
 @login_required
 def index():
 	trips = Trip.query.filter_by(user_id=current_user.id).all()

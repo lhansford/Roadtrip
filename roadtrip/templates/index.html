@@ -1,9 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Hi, {{user.email}}!</h1>
-<a href="{{ url_for('new_trip') }}">Create a new trip</a>
-{% for trip in trips %}
-	<p>{{ trip.name }}</p>
-{% endfor %}
-
+<div class="row">
+	<div class="col-md-6">
+		<h1>Hi, {{user.email}}!</h1>
+		<div class="list-group">
+			{% for trip in trips %}
+				<a href="#" class="list-group-item">{{ trip.name }}</a>
+			{% endfor %}
+			<a href="{{ url_for('new_trip') }}" class="list-group-item list-group-item-success"><span class="glyphicon glyphicon-plus"></span>Add a new trip</a>
+		</div>
+	</div>
+</div>
 {% endblock %}
