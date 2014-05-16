@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block css %}
-<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
-<style type="text/css">
-#map { height: 480px; }
-</style>
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+	<style type="text/css">
+		#map { height: 480px; }
+	</style>
 {% endblock %}
 {% block js %}
- <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
- <script src="/static/js/leaflet-providers.js"></script>
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+	<script src="/static/js/leaflet-providers.js"></script>
 {% endblock %}
 {% block content %}
 	<h1>{{ trip.name }} - Day {{ day_num }}</h1>

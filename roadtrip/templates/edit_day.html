@@ -1,16 +1,39 @@
 {% extends "base.html" %}
+
+{% block css %}
+<style type="text/css">
+	.delete-location{
+		float:right;
+		position: relative;
+		top: -7px;
+	}
+</style>
+{% endblock %}
+
 {% block js %}
 <script type="text/javascript" src="/static/js/sortable.min.js"></script>
 {% endblock %}
 {% block content %}
-	<h1>{{ trip.name }} - Day {{ day_num }}</h1>
-	<ul id="locations">
-	{% for location in locations %}
-			<li data-id="{{ location.id }}">{{ location.name }}<button class="delete-location">x</button></li>
-	{% endfor %}
-	</ul>
-	<input id="location-input"></input>
-	<button id="add-location">Add Location</button>
+<div class="row">
+	<div class="col-md-6">
+		<h1>{{ trip.name }} - Day {{ day_num }}</h1>
+		<ul class="list-group" id="locations">
+			{% for location in locations %}
+				<li class="list-group-item" data-id="{{ location.id }}">
+					{{ location.name }}
+					<button class="delete-location btn btn-default">Remove</button>
+				</li>
+			{% endfor %}
+		</ul>
+		<div class="input-group">
+			<input type="text" class="form-control" id="location-input">
+      <span class="input-group-btn">
+        <button class="btn btn-default" type="button" id="add-location">Add</button>
+      </span>
+    </div>
+  </div>
+</div>
+
 	<script type="text/javascript">
 	var locationsList = document.getElementById("locations");
 	new Sortable(locationsList, {onUpdate: function(event){ listSorted(event); } });

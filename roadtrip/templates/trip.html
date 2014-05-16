@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block css %}
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+	<link rel="stylesheet" type="text/css" href="/static/css/elastislide.css" />
+	<style type="text/css">
+		#map { height: 480px; }	
+		.elastislide-vertical {
+			padding: 37px 10px;
+		}
+
+		.elastislide-vertical:before {
+			top: 30px;
+			bottom: 30px;
+			left: 0;
+			right: 0;
+			content: " ";
+			position: absolute;
+			z-index: -2;
+		}
+
+		.elastislide-vertical:after {
+			content: " ";
+			position: absolute;
+			z-index: -2;
+		}
+	</style>
+{% endblock %}
+{% block js %}
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+	<script src="/static/js/leaflet-providers.js"></script>
+	<script type="text/javascript" src="/static/js/modernizr.custom.17475.js"></script>
+	<script type="text/javascript" src="/static/js/jquerypp.custom.js"></script>
+	<script type="text/javascript" src="/static/js/jquery.elastislide.js"></script>
+{% endblock %}
+{% block content %}
+	<div class="row">
+		<div class="col-md-12">
+			<h1>{{ trip.name }}</h1>
+			<ul class="nav nav-tabs">
+				<li class="trip-all active"><a href="#">All</a></li>
+				{% for day in trip_data %}
+					<li class="trip-day" data-id="{{ day.num }}"><a href="#">Day {{ day.num }} - {{ day.date }}</a></li>
+				{% endfor %}
+			</ul>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-9">
+			<div id="map"></div>
+		</div>
+		<div class="col-md-3">
+			<ul id="carousel" class="elastislide-list">
+		    <li><a href="#"><img src="/static/images/1.jpg" alt="image01" /></a></li>
+		    <li><a href="#"><img src="/static/images/2.jpg" alt="image02" /></a></li>
+		    <li><a href="#"><img src="/static/images/3.gif" alt="image03" /></a></li>
+		    <li><a href="#"><img src="/static/images/1.jpg" alt="image03" /></a></li>
+		    <li><a href="#"><img src="/static/images/2.jpg" alt="image03" /></a></li>
+			</ul>
+			<div class="well well-lg">
+				<p>Upload an image.<span class="glyphicon glyphicon-plus"></span></p>
+				
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		$('#carousel').elastislide({orientation:'vertical', minItems : 2,});
+
+		var active = $('.trip-all');
+		var tripData = {{ trip_data | tojson }};
+		var totalRoute = {{ total_route | tojson }};
+		var map = L.map('map').setView(totalRoute.centroid, totalRoute.zoom);
+
+		L.tileLayer.provider('Esri.WorldTopoMap').addTo(map);
+
+		//Add route to map
+		var polyline = L.polyline(totalRoute.route, {color: 'red'}).addTo(map);
+
+		$('.trip-all').click(function(){
+			if ($(this) != active){
+				polyline.setLatLngs(totalRoute.route);
+				map.setView(totalRoute.centroid, totalRoute.zoom);
+				active.removeClass('active');
+				$(this).addClass('active');
+				active = $(this);
+			};
+		});
+
+		$('.trip-day').click(function(){
+			if ($(this) != active){
+				var id = $(this).data("id")-1;
+				var day = tripData[id];
+				polyline.setLatLngs(day.route);
+				map.setView(day.centroid, day.zoom);
+				active.removeClass('active');
+				$(this).addClass('active');
+				active = $(this);
+			};
+		});
+
+		
+
+		// //Add location markers to map
+		// for(var i = 0; i < locations.length; i++ ){
+		// 	var l = locations[i];
+		// 	createMarker(l.latitude, l.longitude, l.name);
+		// }
+
+		// function createMarker(lat, lng, name){
+		// 	L.marker([lat, lng]).addTo(map)
+		//     .bindPopup(name);
+		// }
+	</script>
+{% endblock %}

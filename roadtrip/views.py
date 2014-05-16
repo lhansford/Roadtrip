@@ -21,6 +21,24 @@ def index():
 	 trips=trips,
 	 title="Home")
 
+@app.route('/trip/<int:trip_id>')
+def trip(trip_id):
+	""" Loads a particular trip """
+	trip = Trip.query.get(trip_id)
+	days = Day.query.filter_by(trip=trip).order_by(Day.date).all()
+	trip_data = get_trip_data(days)
+	r = []
+	for d in trip_data:
+		r += d['route']
+	total_route = {'route':r}
+	total_route['centroid'], total_route['zoom'] = get_route_centroid_and_zoom(total_route['route'])
+	return render_template("trip.html",
+	 trip=trip,
+	 trip_data=trip_data,
+	 total_route=total_route,
+	 user=current_user,
+	 title=trip.name)
+
 @app.route('/newtrip', methods = ['GET', 'POST'])
 @login_required
 def new_trip():
@@ -52,11 +70,6 @@ def new_trip():
 		return redirect(url_for('index'))
 	return render_template("new_trip.html", form = form)
 
-@app.route('/trip/<trip_name>')
-def trip(trip_name):
-	""" Loads a particular trip """
-	pass
-
 @app.route('/trip/<int:trip_id>/<int:day_num>')
 def day(trip_id, day_num):
 	""" Loads a particular day of a trip """
@@ -80,7 +93,8 @@ def day(trip_id, day_num):
 		locations=locations, 
 		route=route,
 		centroid=centroid,
-		zoom=zoom
+		zoom=zoom,
+		user=current_user,
 	)
 
 @app.route('/trip/<int:trip_id>/edit')
@@ -93,15 +107,7 @@ def edit_trip(trip_id):
 	if current_user != trip.user:
 		return redirect('index')
 	days = Day.query.filter_by(trip=trip).order_by(Day.date).all()
-	trip_data = []
-	num = 1
-	for day in days:
-		d = {}
-		d['date'] = day.date
-		d['num'] = num
-		d['locations'] = Location.query.filter_by(day=day).all()
-		trip_data.append(d)
-		num += 1
+	trip_data = get_trip_data(days)
 	return render_template("edit_trip.html", trip=trip, days=trip_data)
 
 @app.route('/trip/<int:trip_id>/<int:day_num>/edit')
@@ -234,6 +240,8 @@ def get_route(locations):
 	""" Returns a list of latlng tuples representing a journey. Locations is a 
 	list of dicts where each dict contains a latitude and longitude.
 	"""
+	if len(locations) < 2:
+		return []
 	url = "http://router.project-osrm.org/viaroute?loc="
 	for location in locations:
 		url += str(location['latitude'])
@@ -312,8 +320,9 @@ def delete_image(image):
 	""" Delete a particular image"""
 	pass
 
-def get_route_centroid(route):
+def get_route_centroid_and_zoom(route):
 	""" Returns the centroid and zoom level for the locations in route. """
+
 	latitudes = [l[0] for l in route]
 	longitudes = [l[1] for l in route]
 	lat = (max(latitudes) + min(latitudes)) / 2
@@ -328,4 +337,26 @@ def get_route_centroid(route):
 		zoom += 1
 	return (lat, lng), zoom
 
-
+def get_trip_data(days):
+	"""Takes an object days containing a number of Day objects and creates
+	a dictionary of data for a trip.
+	"""
+	trip_data = []
+	num = 1
+	for day in days:
+		d = {}
+		d['date'] = day.date.strftime("%a, %d %B %Y")
+		d['num'] = num
+		#Need to convert object to dict so JS can convert to JSON later on.
+		d['locations'] = [{'latitude':l.latitude, 'longitude':l.longitude, 'name':l.name} for l in Location.query.filter_by(day=day).order_by(Location.order).all()]
+		d['route'] = get_route(d['locations'])
+		if not d['route']:
+			d['centroid'] = (d['locations'][0]['latitude'],d['locations'][0]['longitude'])
+			d['zoom'] = 3
+		else:	
+			centroid, zoom = get_route_centroid_and_zoom(d['route'])
+			d['centroid'] = centroid
+			d['zoom'] = zoom
+		trip_data.append(d)
+		num += 1
+	return trip_data

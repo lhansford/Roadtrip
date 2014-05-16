@@ -1,20 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
-	<h1>{{ trip.name }}</h1>
-	<section id="days">
-		{% for day in days %}
-			<div class="day">
-				<h4>Day {{ day.num }} - {{ day.date }}</h4>
-				<ol>
-				{% for location in day.locations %}
-					<li>{{ location.name }}</li>
-				{% endfor %}
-				</ol>
-			</div>
-		{% endfor %}
-	</section>
-	<button id="addDay">Add day</button>
-	<button id="removeDay">Remove last day</button>
+<div class="row">
+	<div class="col-md-6">
+		<h1>{{ trip.name }}</h1>
+		<section id="days">
+			{% for day in days %}
+				<div class="day">
+					<h4><a href="{{ url_for('edit_day', trip_id=trip.id, day_num=day.num) }}">Day {{ day.num }} - {{ day.date }}</a></h4>
+					<ol>
+					{% for location in day.locations %}
+						<li>{{ location.name }}</li>
+					{% endfor %}
+					</ol>
+				</div>
+			{% endfor %}
+		</section>
+		<button id="addDay" type="button" class="btn btn-primary">Add day</button>
+		<button id="removeDay" type="button" class="btn btn-danger">Remove last day</button>
+	</div>
+</div>
+
 	<script type="text/javascript">
 	$("#addDay").click(addDay);
 	$("#removeDay").click(removeDay);
