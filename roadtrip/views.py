@@ -1,16 +1,18 @@
 from datetime import datetime, timedelta
 import math
 import json
+import os
 
 from flask import render_template, redirect, url_for, flash, request, session, g, jsonify
 from flask.ext.security import login_required, current_user
+from werkzeug.utils import secure_filename
 
 import requests
 from sqlalchemy import desc
 
 from roadtrip import app, db, user_datastore
-from roadtrip.models import User, Trip, Day, Location
-from roadtrip.forms import TripForm, DayForm, DestinationForm
+from .models import User, Trip, Day, Location, Image
+from .forms import TripForm, DayForm, DestinationForm
 
 @app.route('/')
 @login_required
@@ -21,9 +23,28 @@ def index():
 	 trips=trips,
 	 title="Home")
 
-@app.route('/trip/<int:trip_id>')
+@app.route('/trip/<int:trip_id>', methods = ['GET', 'POST'])
 def trip(trip_id):
 	""" Loads a particular trip """
+	if request.method == 'POST':
+		upload = request.files['file']
+		if upload and allowed_file(upload.filename):
+			image = Image(
+				name = upload.filename,
+				path = "",
+				upload_date = datetime.today(),
+				user = current_user,
+				trip = Trip.query.get(trip_id),
+				day = None
+			)
+			db.session.add(image)
+			db.session.flush()
+			extension = upload.filename.split('.')[-1]
+			filename = secure_filename(str(image.id) + '.' + extension)
+			upload.save(os.path.join(app.config['UPLOAD_DIR'], filename))
+			image.path = filename
+			db.session.commit()
+			return redirect(url_for('trip', trip_id=trip_id))
 	trip = Trip.query.get(trip_id)
 	days = Day.query.filter_by(trip=trip).order_by(Day.date).all()
 	trip_data = get_trip_data(days)
@@ -32,12 +53,14 @@ def trip(trip_id):
 		r += d['route']
 	total_route = {'route':r}
 	total_route['centroid'], total_route['zoom'] = get_route_centroid_and_zoom(total_route['route'])
+	images = Image.query.filter_by(trip=trip).all()
 	return render_template("trip.html",
 	 trip=trip,
 	 trip_data=trip_data,
 	 total_route=total_route,
 	 user=current_user,
-	 title=trip.name)
+	 title=trip.name,
+	 images=images)
 
 @app.route('/newtrip', methods = ['GET', 'POST'])
 @login_required
@@ -360,3 +383,6 @@ def get_trip_data(days):
 		trip_data.append(d)
 		num += 1
 	return trip_data
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']

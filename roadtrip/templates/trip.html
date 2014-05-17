@@ -50,15 +50,16 @@
 		</div>
 		<div class="col-md-3">
 			<ul id="carousel" class="elastislide-list">
-		    <li><a href="#"><img src="/static/images/1.jpg" alt="image01" /></a></li>
-		    <li><a href="#"><img src="/static/images/2.jpg" alt="image02" /></a></li>
-		    <li><a href="#"><img src="/static/images/3.gif" alt="image03" /></a></li>
-		    <li><a href="#"><img src="/static/images/1.jpg" alt="image03" /></a></li>
-		    <li><a href="#"><img src="/static/images/2.jpg" alt="image03" /></a></li>
+				{% for image in images %}
+		    	<li><a href="#"><img src="/static/uploads/{{ image.path }}" alt="{{ image.name }}" /></a></li>
+		    {% endfor %}
 			</ul>
 			<div class="well well-lg">
 				<p>Upload an image.<span class="glyphicon glyphicon-plus"></span></p>
-				
+				<form action="" method=post enctype=multipart/form-data>
+      		<input type=file name=file>
+         	<input type=submit value=Upload>
+        </form>
 			</div>
 		</div>
 	</div>

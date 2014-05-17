@@ -1,3 +1,5 @@
+"""Database models for Roadtrip."""
+
 from roadtrip import db
 from flask.ext.security import UserMixin, RoleMixin
 
@@ -20,6 +22,7 @@ class User(db.Model, UserMixin):
 	roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
 
 class Trip(db.Model):
+	"""A user created trip."""
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(255))
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -39,3 +42,15 @@ class Location(db.Model):
 	order = db.Column(db.Integer) 
 	day_id = db.Column(db.Integer, db.ForeignKey('day.id'))
 	day = db.relationship('Day', backref=db.backref('locations', lazy='dynamic'))
+
+class Image(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	name = db.Column(db.String(140))
+	path = db.Column(db.String(140))
+	upload_date = db.Column(db.Date)
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	user = db.relationship('User', backref=db.backref('images', lazy='dynamic'))
+	trip_id = db.Column(db.Integer, db.ForeignKey('trip.id'))
+	trip = db.relationship('Trip', backref=db.backref('images', lazy='dynamic'))
+	day_id = db.Column(db.Integer, db.ForeignKey('day.id'), nullable=True)
+	day = db.relationship('Day', backref=db.backref('images', lazy='dynamic'))
