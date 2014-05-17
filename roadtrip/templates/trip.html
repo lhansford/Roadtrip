@@ -41,6 +41,7 @@
 				{% for day in trip_data %}
 					<li class="trip-day" data-id="{{ day.num }}"><a href="#">Day {{ day.num }} - {{ day.date }}</a></li>
 				{% endfor %}
+				<li id="add-day"><a href="#"><span class="glyphicon glyphicon-plus"></span></a></li>
 			</ul>
 		</div>
 	</div>
@@ -51,7 +52,7 @@
 		<div class="col-md-3">
 			<ul id="carousel" class="elastislide-list">
 				{% for image in images %}
-		    	<li><a href="#"><img src="/static/uploads/{{ image.path }}" alt="{{ image.name }}" /></a></li>
+		    	<li><a href="/uploads/{{ image.path }}"><img class="thumbnail" src="/uploads/{{ image.path }}" alt="{{ image.name }}" /></a></li>
 		    {% endfor %}
 			</ul>
 			<div class="well well-lg">
@@ -66,6 +67,7 @@
 
 	<script type="text/javascript">
 		$('#carousel').elastislide({orientation:'vertical', minItems : 2,});
+		$("#add-day").click(addDay);
 
 		var active = $('.trip-all');
 		var tripData = {{ trip_data | tojson }};
@@ -77,10 +79,28 @@
 		//Add route to map
 		var polyline = L.polyline(totalRoute.route, {color: 'red'}).addTo(map);
 
+		//Add location markers to map
+		var markers = [];
+		for(var i = 0; i < totalRoute.locations.length; i++ ){
+			var l = totalRoute.locations[i];
+			markers.push(L.marker([l.latitude, l.longitude]).bindPopup(l.name));
+		}
+		var markerLayer = L.layerGroup(markers).addTo(map);
+
 		$('.trip-all').click(function(){
 			if ($(this) != active){
-				polyline.setLatLngs(totalRoute.route);
+				//Set map dimensions
 				map.setView(totalRoute.centroid, totalRoute.zoom);
+				//Add route
+				polyline.setLatLngs(totalRoute.route);
+				//Add markers
+				markerLayer.clearLayers();
+				markers = [];
+				for(var i = 0; i < totalRoute.locations.length; i++ ){
+					var l = totalRoute.locations[i];
+					markers.push(L.marker([l.latitude, l.longitude]).bindPopup(l.name));
+				}
+				markerLayer = L.layerGroup(markers).addTo(map);
 				active.removeClass('active');
 				$(this).addClass('active');
 				active = $(this);
@@ -91,25 +111,37 @@
 			if ($(this) != active){
 				var id = $(this).data("id")-1;
 				var day = tripData[id];
-				polyline.setLatLngs(day.route);
+				//Set map dimensions
 				map.setView(day.centroid, day.zoom);
+				//Add route
+				polyline.setLatLngs(day.route);
+				//Add markers
+				markerLayer.clearLayers();
+				markers = [];
+				for(var i = 0; i < day.locations.length; i++ ){
+					var l = day.locations[i];
+					markers.push(L.marker([l.latitude, l.longitude]).bindPopup(l.name));
+				}
+				markerLayer = L.layerGroup(markers).addTo(map);
 				active.removeClass('active');
 				$(this).addClass('active');
 				active = $(this);
 			};
 		});
+	
+	function createMarker(lat, lng, name){
+			L.marker([lat, lng]).addTo(map)
+		    .bindPopup(name);
+		}
 
+	function addDay(){
+		var url = '/trip/' + {{ trip.id }} + '/_add_day';
+		$.getJSON(url, function (data){
+		// 	var html = '<div class="day"><h4>Day ' + data.day + ' - ' + data.date +
+		// 	 '</h4><ol><li>' + data.location + '</li></ol></div>';
+		// 	$("#days").append(html);
+		});
+	}
 		
-
-		// //Add location markers to map
-		// for(var i = 0; i < locations.length; i++ ){
-		// 	var l = locations[i];
-		// 	createMarker(l.latitude, l.longitude, l.name);
-		// }
-
-		// function createMarker(lat, lng, name){
-		// 	L.marker([lat, lng]).addTo(map)
-		//     .bindPopup(name);
-		// }
 	</script>
 {% endblock %}

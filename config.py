@@ -10,5 +10,5 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'app.db')
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 
 #USER RELATED
-UPLOAD_DIR = os.path.join(basedir, 'roadtrip/static/uploads')
+UPLOAD_DIR = os.path.join(basedir, 'roadtrip/uploads')
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])

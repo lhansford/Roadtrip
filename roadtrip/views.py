@@ -3,7 +3,7 @@ import math
 import json
 import os
 
-from flask import render_template, redirect, url_for, flash, request, session, g, jsonify
+from flask import render_template, redirect, url_for, flash, request, session, g, jsonify, send_from_directory
 from flask.ext.security import login_required, current_user
 from werkzeug.utils import secure_filename
 
@@ -24,6 +24,7 @@ def index():
 	 title="Home")
 
 @app.route('/trip/<int:trip_id>', methods = ['GET', 'POST'])
+@login_required
 def trip(trip_id):
 	""" Loads a particular trip """
 	if request.method == 'POST':
@@ -48,10 +49,13 @@ def trip(trip_id):
 	trip = Trip.query.get(trip_id)
 	days = Day.query.filter_by(trip=trip).order_by(Day.date).all()
 	trip_data = get_trip_data(days)
-	r = []
-	for d in trip_data:
-		r += d['route']
-	total_route = {'route':r}
+	routes = []
+	locations = []
+	for day in trip_data:
+		routes += day['route']
+		locations += day['locations']
+	# locations = list(set(locations))
+	total_route = {'route':routes, 'locations':locations}
 	total_route['centroid'], total_route['zoom'] = get_route_centroid_and_zoom(total_route['route'])
 	images = Image.query.filter_by(trip=trip).all()
 	return render_template("trip.html",
@@ -91,9 +95,13 @@ def new_trip():
 		db.session.commit()
 		flash('Your trip has been created.')
 		return redirect(url_for('index'))
-	return render_template("new_trip.html", form = form)
+	return render_template("new_trip.html",
+		form = form,
+		user=current_user,
+		title="Start a new Roadtrip!")
 
 @app.route('/trip/<int:trip_id>/<int:day_num>')
+@login_required
 def day(trip_id, day_num):
 	""" Loads a particular day of a trip """
 	trip = Trip.query.get(trip_id)
@@ -146,7 +154,7 @@ def edit_day(trip_id, day_num):
 		return "ERROR"
 	day = days[-1]
 	locations = Location.query.filter_by(day=day).order_by(Location.order).all()
-	return render_template("edit_day.html", trip=trip, day=day, day_num=day_num, locations=locations)
+	return render_template("edit_day.html", trip=trip, day=day, day_num=day_num, locations=locations, user=current_user)
 
 @app.route('/trip/<int:trip_id>/_add_day')
 @login_required
@@ -174,7 +182,7 @@ def _add_day(trip_id):
 	db.session.commit()
 	new_data = {
 		"day": Day.query.count(),
-		"date": new_day.date,
+		"date": new_day.date.strftime("%a, %d %B %Y"),
 		"location": new_location.name
 	} 
 	return jsonify(new_data)
@@ -248,6 +256,14 @@ def reorder_locations():
 		order += 1
 	return "Okay"
 
+@app.route('/uploads/<filename>')
+@login_required
+def uploaded_file(filename):
+	image = Image.query.get(int(filename.split('.')[0]))
+	if current_user != image.user:
+		return redirect(url_for('index'))
+	return send_from_directory(app.config['UPLOAD_DIR'], filename)
+
 def get_location(query):
 	""" Returns a tuple containing the latitude and longitude of the result. 
 	Query is a comma seperated list of keywords. NEEDS IMPROVEMENT FOR 
@@ -263,8 +279,11 @@ def get_route(locations):
 	""" Returns a list of latlng tuples representing a journey. Locations is a 
 	list of dicts where each dict contains a latitude and longitude.
 	"""
-	if len(locations) < 2:
+	if len(locations) == 0:
 		return []
+	if len(locations) == 1:
+		return [(locations[0]['latitude'], locations[0]['longitude'])]
+
 	url = "http://router.project-osrm.org/viaroute?loc="
 	for location in locations:
 		url += str(location['latitude'])
@@ -345,7 +364,10 @@ def delete_image(image):
 
 def get_route_centroid_and_zoom(route):
 	""" Returns the centroid and zoom level for the locations in route. """
-
+	if len(route) == 1:
+		return (route[0][0],route[0][1]), 3
+	elif len(route) == 0:
+		return (0,0), 2
 	latitudes = [l[0] for l in route]
 	longitudes = [l[1] for l in route]
 	lat = (max(latitudes) + min(latitudes)) / 2
@@ -373,7 +395,7 @@ def get_trip_data(days):
 		#Need to convert object to dict so JS can convert to JSON later on.
 		d['locations'] = [{'latitude':l.latitude, 'longitude':l.longitude, 'name':l.name} for l in Location.query.filter_by(day=day).order_by(Location.order).all()]
 		d['route'] = get_route(d['locations'])
-		if not d['route']:
+		if len(d['locations']) < 2:
 			d['centroid'] = (d['locations'][0]['latitude'],d['locations'][0]['longitude'])
 			d['zoom'] = 3
 		else:	
