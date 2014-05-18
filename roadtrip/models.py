@@ -25,8 +25,16 @@ class Trip(db.Model):
 	"""A user created trip."""
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(255))
+	is_public = db.Column(db.Boolean())
+	map_tilesets = db.Column(db.String(255), default='Esri.WorldTopoMap')
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	user = db.relationship('User', backref=db.backref('users', lazy='dynamic'))
+
+	def get_tilesets(self):
+		"""	Returns a list of tilesets to be used for the map representing this 
+			trip.
+		"""
+		return self.map_tilesets.split(',')
 
 class Day(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
@@ -54,3 +62,4 @@ class Image(db.Model):
 	trip = db.relationship('Trip', backref=db.backref('images', lazy='dynamic'))
 	day_id = db.Column(db.Integer, db.ForeignKey('day.id'), nullable=True)
 	day = db.relationship('Day', backref=db.backref('images', lazy='dynamic'))
+	

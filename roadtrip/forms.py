@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import flash
 from flask.ext.wtf import Form
-from wtforms import TextField, FieldList, FormField, DateField
+from wtforms import TextField, FieldList, FormField, DateField, RadioField
 from wtforms.validators import Required, Length, Optional
 
 class DestinationForm(Form):
@@ -32,3 +32,11 @@ class TripForm(Form):
 			flash("The date you selected is invalid.")
 			return False
 		return True
+
+class TripSettingsForm(Form):
+	name = TextField('Name', validators = [Required(), Length(max=255)])
+	tileset = RadioField('Tileset', choices=[
+		('Stamen.Watercolor','Stamen Watercolor'),
+		('OpenStreetMap.Mapnik','OpenStreetMap Mapnik'),
+		('Esri.WorldTopoMap','Esri WorldTopoMap'),
+	])

@@ -12,7 +12,7 @@ from sqlalchemy import desc
 
 from roadtrip import app, db, user_datastore
 from .models import User, Trip, Day, Location, Image
-from .forms import TripForm, DayForm, DestinationForm
+from .forms import TripForm, DayForm, DestinationForm, TripSettingsForm
 
 @app.route('/')
 @login_required
@@ -64,7 +64,26 @@ def trip(trip_id):
 	 total_route=total_route,
 	 user=current_user,
 	 title=trip.name,
-	 images=images)
+	 images=images,)
+
+@app.route('/trip/<int:trip_id>/settings', methods = ['GET', 'POST'])
+@login_required
+def trip_settings(trip_id):
+	trip = Trip.query.get(trip_id)
+	form = TripSettingsForm(request.form)
+	if form.validate_on_submit():
+		trip.name = form.name.data
+		#The following line will need to change when selecting multiple tilesets is enabled.
+		trip.map_tilesets = form.tileset.data
+		db.session.commit()
+		return redirect(url_for('trip', trip_id=trip_id))
+	form.name.data = trip.name
+	#The following line will need to change when selecting multiple tilesets is enabled.
+	form.tileset.data = trip.get_tilesets()[0]
+	return render_template("trip_settings.html",
+		trip=trip,
+		form=form,
+		user=current_user)
 
 @app.route('/newtrip', methods = ['GET', 'POST'])
 @login_required

@@ -71,10 +71,12 @@
 
 		var active = $('.trip-all');
 		var tripData = {{ trip_data | tojson }};
+		var tilesets = {{ trip.get_tilesets() | tojson }};
 		var totalRoute = {{ total_route | tojson }};
 		var map = L.map('map').setView(totalRoute.centroid, totalRoute.zoom);
 
-		L.tileLayer.provider('Esri.WorldTopoMap').addTo(map);
+		// The following line will need to change when selecting multiple tilesets is enabled.
+		L.tileLayer.provider(tilesets[0]).addTo(map);
 
 		//Add route to map
 		var polyline = L.polyline(totalRoute.route, {color: 'red'}).addTo(map);
