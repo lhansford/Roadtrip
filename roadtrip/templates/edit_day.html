@@ -1,6 +1,3 @@
-{% extends "base.html" %}
-
-{% block css %}
 <style type="text/css">
 	.delete-location{
 		float:right;
@@ -8,58 +5,60 @@
 		top: -7px;
 	}
 </style>
-{% endblock %}
-
-{% block js %}
 <script type="text/javascript" src="/static/js/sortable.min.js"></script>
-{% endblock %}
-{% block content %}
-<div class="row">
-	<div class="col-md-6">
-		<h1>{{ trip.name }} - Day {{ day_num }}</h1>
-		<ul class="list-group" id="locations">
-			{% for location in locations %}
-				<li class="list-group-item" data-id="{{ location.id }}">
-					{{ location.name }}
-					<button class="delete-location btn btn-default">Remove</button>
-				</li>
-			{% endfor %}
-		</ul>
-		<div class="input-group">
-			<input type="text" class="form-control" id="location-input">
-      <span class="input-group-btn">
-        <button class="btn btn-default" type="button" id="add-location">Add</button>
-      </span>
-    </div>
-  </div>
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+  <h4 class="modal-title" id="myModalLabel">{{ trip.name }} - Day {{ day_num }}</h4>
 </div>
-
+<div class="modal-body">
+	<div class="row">
+		<div class="col-md-12">
+			<ul class="list-group" id="locations">
+				{% for location in locations %}
+					<li class="list-group-item" data-id="{{ location.id }}">
+						{{ location.name }}
+						<button class="delete-location btn btn-default">Remove</button>
+					</li>
+				{% endfor %}
+			</ul>
+			<div class="input-group">
+				<input type="text" class="form-control" id="location-input">
+	      <span class="input-group-btn">
+	        <button class="btn btn-default" type="button" id="add-location">Add</button>
+	      </span>
+	    </div>
+	  </div>
+	</div>
+</div>
 	<script type="text/javascript">
 	var locationsList = document.getElementById("locations");
 	new Sortable(locationsList, {onUpdate: function(event){ listSorted(event); } });
 
 	$("#add-location").click(addLocation);
 	$(".delete-location").click(deleteLocation);
+
 	function addLocation(){
 		var location = $("#location-input").val();
 		var url = '/trip/' + {{ trip.id }} + '/' + {{ day_num }} + '/_add/' + location;
 		$.getJSON(url, function (data){
-			console.log(data);
+			var html = '<li class="list-group-item" data-id="' + data.id + '">' + data.name + '<button class="delete-location btn btn-default">Remove</button></li>';
+			$('#locations').append(html)
+			$("#location-input").val("");
 		});
 	}
 
 	function deleteLocation(e){
-		console.log("clicked");
-		var locationId = $(this).parent().data("id");
+		var item = $(this).parent();
+		var locationId = item.data("id");
 		var url = '/_remove_location/' + locationId;
 		$.getJSON(url, function (data){ //Currently doesn't return any JSON. Maybe use a different jquery call?
-			$(this).parent().remove();
-		});	
+			item.remove();
+			listSorted();
+		});
 	}
 
 	function listSorted(event){
 		// Called when the list is changed. Send new order to server to be saved.
-		console.log('change');
 		locations = [];
 		$('#locations > li').each(function(d){
 			locations.push($(this).data("id"));
@@ -75,4 +74,3 @@
 	}
 
 	</script>
-{% endblock %}

@@ -249,8 +249,7 @@ def _add_location(trip_id, day_num, location_query):
 	)
 	db.session.add(new_location)
 	db.session.commit()
-	# return jsonify(new_day = new_day, new_location = new_location)
-	return jsonify({"TEST":1})
+	return jsonify({"name":new_location.name, "id":new_location.id})
 
 @app.route('/_remove_day/<int:trip_id>')
 @login_required
@@ -337,6 +336,9 @@ def get_route(locations):
 		url += str(location['longitude'])
 		url += '&loc='
 	r = requests.get(url[:-5]) #Remove last '&loc='
+	if r.json()['status'] == 207:
+		#Issue finding route
+		return []
 	return decode_polyline(r.json()['route_geometry'])
 
 def decode_polyline(encoded_string):

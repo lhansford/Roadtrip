@@ -2,8 +2,11 @@ from datetime import datetime
 
 from flask import flash
 from flask.ext.wtf import Form
+from flask.ext.security import current_user
 from wtforms import TextField, FieldList, FormField, DateField, RadioField
 from wtforms.validators import Required, Length, Optional
+
+from .models import Trip
 
 class DestinationForm(Form):
 	destination = TextField('Destination')
@@ -19,6 +22,9 @@ class TripForm(Form):
 	def validate(self):
 		if self.name.data == "" or self.name.data == None:
 			flash("You need to name your trip.")
+			return False
+		if self.name.data in [trip.name for trip in Trip.query.filter_by(user_id=current_user.id).all()]:
+			flash("You already have a trip with the name '" + self.name.data + "'. Try a different name.")
 			return False
 		if self.start_date.data == "" or self.start_date.data == None:
 			flash("You need to set a start date for your trip.")
