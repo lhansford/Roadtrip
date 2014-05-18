@@ -33,6 +33,7 @@ def trip(trip_id):
 			image = Image(
 				name = upload.filename,
 				path = "",
+				description = "",
 				upload_date = datetime.today(),
 				user = current_user,
 				trip = Trip.query.get(trip_id),
@@ -300,6 +301,14 @@ def uploaded_file(filename):
 	if current_user != image.user:
 		return redirect(url_for('index'))
 	return send_from_directory(app.config['UPLOAD_DIR'], filename)
+
+@app.route('/trip/image/<int:image_id>')
+@login_required
+def image(image_id):
+	image = Image.query.get(image_id)
+	if current_user != image.trip.user:
+		return redirect('index')
+	return render_template("image.html", user=current_user, image=image) 
 
 def get_location(query):
 	""" Returns a tuple containing the latitude and longitude of the result. 

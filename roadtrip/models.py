@@ -55,6 +55,7 @@ class Image(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(140))
 	path = db.Column(db.String(140))
+	description = db.Column(db.String(255))
 	upload_date = db.Column(db.Date)
 	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	user = db.relationship('User', backref=db.backref('images', lazy='dynamic'))
