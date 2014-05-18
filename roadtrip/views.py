@@ -85,6 +85,24 @@ def trip_settings(trip_id):
 		form=form,
 		user=current_user)
 
+@app.route('/trip/<int:trip_id>/delete')
+@login_required
+def delete_trip(trip_id):
+	trip = Trip.query.get(trip_id)
+	days = Day.query.filter_by(trip=trip).all()
+	for day in days:
+		for location in Location.query.filter_by(day=day).all():
+			db.session.delete(location)
+		db.session.delete(day)
+	images = Image.query.filter_by(trip=trip).all()
+	for image in images:
+		os.remove(os.path.join(app.config['UPLOAD_DIR'], image.path))
+		db.session.delete(image)
+	db.session.delete(trip)
+	db.session.commit()
+	flash('Your trip was successfully deleted.')
+	return redirect(url_for('index'))
+
 @app.route('/newtrip', methods = ['GET', 'POST'])
 @login_required
 def new_trip():

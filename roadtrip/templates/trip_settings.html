@@ -3,20 +3,36 @@
 	<div class="row">
 		<div class="col-md-12">
 			<h1>{{ trip.name }}</h1>
-			<form action="" method="post" name="trip">
-				{{form.hidden_tag()}}
-				<div class="form-group">
-					<label for="name">Trip Name</label>
-					{{ form.name(maxlength="255", class="form-control") }}
+			<div class="panel panel-default">
+			  <div class="panel-heading">
+			  	<h3 class="panel-title">Trip Settings</h3>
+			  </div>
+			  <div class="panel-body">
+					<form action="" method="post" name="trip_settings" role="form">
+						{{form.hidden_tag()}}
+						<div class="form-group">
+							<label for="name">Trip Name</label>
+							{{ form.name(maxlength="255", class="form-control") }}
+						</div>
+						<div class="form-group">
+							<label for="tileset">Map Tileset
+								{{ form.tileset(class="radio") }}
+							</label>
+							<span class="help-block">A block of help text that breaks onto a new line and may extend beyond one line.</span>
+						</div>
+						<button type="submit" class="btn btn-default">Save</button>
+					</form>
 				</div>
-				<div class="form-group">
-					<label for="tileset">Map Tileset
-						{{ form.tileset(class="radio") }}
-					</label>
-					<span class="help-block">A block of help text that breaks onto a new line and may extend beyond one line.</span>
+			</div>
+			<div class="panel panel-danger">
+			  <div class="panel-heading">
+			  	<h3 class="panel-title">Delete this trip</h3>
+			  </div>
+			  <div class="panel-body">
+			  	<p>Be careful! Once you click this button your trip and all its associated content (photos, notes, etc.) will be permanently deleted.</p>
+			  	<a href="{{ url_for('delete_trip', trip_id=trip.id) }}" role="button" class="btn btn-danger">Delete</a>
 				</div>
-				<button type="submit" class="btn btn-default">Create</button>
-			</form>
+			</div>
 		</div>
 	</div>
 {% endblock %}
