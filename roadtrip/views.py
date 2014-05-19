@@ -219,9 +219,8 @@ def _add_day(trip_id):
 	db.session.add(new_location)
 	db.session.commit()
 	new_data = {
-		"day": Day.query.count(),
-		"date": new_day.date.strftime("%a, %d %B %Y"),
-		"location": new_location.name
+		"num": Day.query.filter_by(trip=trip).count(),
+		"date": new_day.date.strftime("%a, %d %B %Y")
 	} 
 	return jsonify(new_data)
 
