@@ -29,6 +29,11 @@ def trip(trip_id):
 	""" Loads a particular trip """
 	if request.method == 'POST':
 		upload = request.files['file']
+		day_id = request.form['Day']
+		try:
+			day = Day.query.get(int(day_id))
+		except:
+			day = None
 		if upload and allowed_file(upload.filename):
 			image = Image(
 				name = upload.filename,
@@ -37,7 +42,7 @@ def trip(trip_id):
 				upload_date = datetime.today(),
 				user = current_user,
 				trip = Trip.query.get(trip_id),
-				day = None
+				day = day
 			)
 			db.session.add(image)
 			db.session.flush()
@@ -295,6 +300,7 @@ def reorder_locations():
 @app.route('/uploads/<filename>')
 @login_required
 def uploaded_file(filename):
+
 	image = Image.query.get(int(filename.split('.')[0]))
 	if current_user != image.user:
 		return redirect(url_for('index'))
@@ -398,13 +404,6 @@ def decode_polyline(encoded_string):
 		output_array.append([lat*decode_precision, lon*decode_precision])
 	return output_array
 
-
-def upload_image(trip, day=None):
-	""" Uploads image(s) to a roadtrip. A day might be specified, but if not the
-	photos are added to an unused bin.
-	"""
-	pass
-
 def delete_image(image):
 	""" Delete a particular image"""
 	pass
@@ -437,6 +436,7 @@ def get_trip_data(days):
 	num = 1
 	for day in days:
 		d = {}
+		d['id'] = day.id
 		d['date'] = day.date.strftime("%a, %d %B %Y")
 		d['num'] = num
 		#Need to convert object to dict so JS can convert to JSON later on.

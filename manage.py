@@ -1,4 +1,4 @@
-#!env/bin/python
+#!flask/bin/python
 from flask.ext.script import Manager, Shell, Server
 from flask.ext.migrate import MigrateCommand
 from roadtrip import app, migrate

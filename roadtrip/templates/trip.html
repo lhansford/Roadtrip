@@ -54,13 +54,14 @@
 			<button id="locations-modal-btn" class="btn btn-primary" data-toggle="modal" href="" data-target="#locations-modal">Edit Locations</button>
 			<ul id="carousel" class="elastislide-list">
 				{% for image in images %}
-		    	<li><a href="{{ url_for('image', image_id = image.id) }}"><img class="thumbnail" src="/uploads/{{ image.path }}" alt="{{ image.name }}" /></a></li>
+		    	<li><a href="{{ url_for('image', image_id = image.id) }}"><img class="thumbnail" src="/uploads/{{ image.path }}" alt="{{ image.name }}" data-day="{{image.day.id}}"/></a></li>
 		    {% endfor %}
 			</ul>
 			<div class="well well-lg">
 				<p>Upload an image.<span class="glyphicon glyphicon-plus"></span></p>
 				<form action="" method=post enctype=multipart/form-data>
       		<input type=file name=file>
+      		<input name="Day" type="hidden" value="" id="upload-day">
          	<input type=submit value=Upload>
         </form>
 			</div>
@@ -116,6 +117,8 @@
 					markers.push(L.marker([l.latitude, l.longitude]).bindPopup(l.name));
 				}
 				markerLayer = L.layerGroup(markers).addTo(map);
+				//Set upload day
+				$("#upload-day").val("");
 				active.removeClass('active');
 				$(this).addClass('active');
 				active = $(this);
@@ -142,6 +145,8 @@
 				markers.push(L.marker([l.latitude, l.longitude]).bindPopup(l.name));
 			}
 			markerLayer = L.layerGroup(markers).addTo(map);
+			//Set upload day
+			$("#upload-day").val(day.id);
 			active.removeClass('active');
 			$(this).addClass('active');
 			active = $(this);
