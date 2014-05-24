@@ -119,6 +119,8 @@
 				markerLayer = L.layerGroup(markers).addTo(map);
 				//Set upload day
 				$("#upload-day").val("");
+				//Set visibile images
+				setDisplayedImages();
 				active.removeClass('active');
 				$(this).addClass('active');
 				active = $(this);
@@ -147,6 +149,8 @@
 			markerLayer = L.layerGroup(markers).addTo(map);
 			//Set upload day
 			$("#upload-day").val(day.id);
+			//Set visibile images
+			setDisplayedImages(day.id);
 			active.removeClass('active');
 			$(this).addClass('active');
 			active = $(this);
@@ -172,6 +176,17 @@
 	
 	function reloadRouteData(){
 		//Reload the data.
+	}
+
+	function setDisplayedImages(dayId){
+		// Sets the displayed images according to the given day ID. If no day ID is
+		// given, all images are set to be visible.
+		if(!dayId){
+			$(".thumbnail").show();
+		}else{
+			$(".thumbnail").hide();
+			$('*[data-day="' + dayId + '"]').show();
+		}
 	}
 
 	</script>
