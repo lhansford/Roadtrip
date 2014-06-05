@@ -42,11 +42,11 @@
 	<div class="row">
 		<div class="col-md-9">
 			<ul class="nav nav-tabs">
-				<li class="trip-all active"><a href="#">All</a></li>
+				<li class="trip-all active"><a>All</a></li>
 				{% for day in trip_data %}
-					<li class="trip-day" data-id="{{ day.num }}"><a href="#">Day {{ day.num }} - {{ day.date }}</a></li>
+					<li class="trip-day" data-id="{{ day.num }}"><a>Day {{ day.num }}</a></li>
 				{% endfor %}
-				<li id="add-day"><a href="#"><span class="glyphicon glyphicon-plus"></span></a></li>
+				<li id="add-day"><a>Add day <span class="glyphicon glyphicon-plus"></span></a></li>
 			</ul>
 			<div id="map"></div>
 		</div>
@@ -75,35 +75,48 @@
 	  </div>
 	</div>
 
-	<script type="text/javascript">
-		$('#carousel').elastislide({orientation:'vertical', minItems : 2,});
+	<script type="text/javascript">	
+
 		$("#add-day").click(addDay);
+		$('.trip-all').click(allClicked);
+		$('.trip-day').click(dayClicked);
+
+		$('#carousel').elastislide({orientation:'vertical', minItems : 2,});
+
+		var active = $('.trip-all');
 
 		var locationsModalButton = $('#locations-modal-btn');
 		locationsModalButton.hide();
 
-		var active = $('.trip-all');
+		
 		var tripData = {{ trip_data | tojson }};
 		var tilesets = {{ trip.get_tilesets() | tojson }};
 		var totalRoute = {{ total_route | tojson }};
-		var map = L.map('map').setView(totalRoute.centroid, totalRoute.zoom);
-
-		// The following line will need to change when selecting multiple tilesets is enabled.
+		var map = L.map('map');
 		L.tileLayer.provider(tilesets[0]).addTo(map);
-
 		//Add route to map
 		var polyline = L.polyline(totalRoute.route, {color: 'red'}).addTo(map);
-
-		//Add location markers to map
 		var markers = [];
-		for(var i = 0; i < totalRoute.locations.length; i++ ){
-			var l = totalRoute.locations[i];
-			markers.push(L.marker([l.latitude, l.longitude]).bindPopup(l.name));
-		}
-		var markerLayer = L.layerGroup(markers).addTo(map);
+		var markerLayer = L.layerGroup(markers);
 
-		$('.trip-all').click(function(){
-			if ($(this) != active){
+		// Jump to dayNum if it exists at page load.
+		var dayNum;
+		dayNum = '{{ day_num if day_num != None  }}';
+		if(dayNum){
+			$('*[data-id=' + dayNum + ']').click();
+		}else{
+			map.setView(totalRoute.centroid, totalRoute.zoom);
+			//Add location markers to map
+			for(var i = 0; i < totalRoute.locations.length; i++ ){
+				var l = totalRoute.locations[i];
+				markers.push(L.marker([l.latitude, l.longitude]).bindPopup(l.name));
+			}
+			markerLayer.clearLayers();
+			markerLayer = L.layerGroup(markers).addTo(map);
+		}
+
+	function allClicked(){
+		if ($(this) != active){
 				locationsModalButton.hide();
 				//Set map dimensions
 				map.setView(totalRoute.centroid, totalRoute.zoom);
@@ -125,9 +138,7 @@
 				$(this).addClass('active');
 				active = $(this);
 			};
-		});
-
-	$('.trip-day').click(dayClicked);
+	}
 
 	function dayClicked(){
 		if ($(this) != active){
@@ -157,6 +168,7 @@
 		};
 	}
 	
+
 	function createMarker(lat, lng, name){
 			L.marker([lat, lng]).addTo(map)
 		    .bindPopup(name);
@@ -167,7 +179,7 @@
 		var url = '/trip/' + {{ trip.id }} + '/_add_day';
 		$.getJSON(url, function (data){
 			//Add new day to tabs.
-			var html = '<li class="trip-day" data-id="' + data.num + '"><a href="#">Day ' + data.num + ' - ' + data.date + '</a></li>';
+			var html = '<li class="trip-day" data-id="' + data.num + '"><a>Day ' + data.num + '</a></li>';
 			var newDay = $(html).insertBefore(lastTab);
 			$(newDay).click(dayClicked);
 			reloadRouteData();

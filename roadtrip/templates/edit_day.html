@@ -23,19 +23,26 @@
 			</ul>
 			<div class="input-group">
 				<input type="text" class="form-control" id="location-input">
-	      <span class="input-group-btn">
-	        <button class="btn btn-default" type="button" id="add-location">Add</button>
-	      </span>
+		      <span class="input-group-btn">
+		        <button class="btn btn-default" type="button" id="add-location">Add</button>
+		      </span>
+		    </input>
 	    </div>
 	  </div>
 	</div>
 </div>
-	<script type="text/javascript">
+<div class="modal-footer">
+  <button type="button" class="btn btn-warning" data-dismiss="modal">Discard Changes</button>
+  <button type="button" class="btn btn-primary" id="done">Save changes</button>
+</div>
+
+<script type="text/javascript">
 	var locationsList = document.getElementById("locations");
 	new Sortable(locationsList, {onUpdate: function(event){ listSorted(event); } });
 
 	$("#add-location").click(addLocation);
 	$(".delete-location").click(deleteLocation);
+	$("#done").click(done);
 
 	function addLocation(){
 		var location = $("#location-input").val();
@@ -73,4 +80,8 @@
     });
 	}
 
-	</script>
+	function done(){
+		window.location.replace( "/trip/" + {{ trip.id }} + "/" + {{ day_num }} );
+	}
+
+</script>

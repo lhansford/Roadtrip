@@ -23,10 +23,11 @@ def index():
 	 trips=trips,
 	 title="Home")
 
-@app.route('/trip/<int:trip_id>', methods = ['GET', 'POST'])
+@app.route('/trip/<int:trip_id>', defaults={'day_num': None}, methods=['GET', 'POST'])
+@app.route('/trip/<int:trip_id>/<int:day_num>', methods = ['GET', 'POST'])
 @login_required
-def trip(trip_id):
-	""" Loads a particular trip """
+def trip(trip_id, day_num):
+	""" Loads a particular trip, with an optional day number to display on page load."""
 	if request.method == 'POST':
 		upload = request.files['file']
 		day_id = request.form['Day']
@@ -42,7 +43,8 @@ def trip(trip_id):
 				upload_date = datetime.today(),
 				user = current_user,
 				trip = Trip.query.get(trip_id),
-				day = day
+				day = day,
+				day_num = day_num
 			)
 			db.session.add(image)
 			db.session.flush()
@@ -70,7 +72,8 @@ def trip(trip_id):
 	 total_route=total_route,
 	 user=current_user,
 	 title=trip.name,
-	 images=images,)
+	 images=images,
+	 day_num = day_num)
 
 @app.route('/trip/<int:trip_id>/settings', methods = ['GET', 'POST'])
 @login_required

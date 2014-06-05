@@ -1,3 +1,7 @@
 .image {
 	margin: 0 auto;
 }
+
+.nav-tabs a {
+	cursor: pointer;
+}
