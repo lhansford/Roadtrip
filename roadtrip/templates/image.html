@@ -11,6 +11,9 @@
 			    <img class="img-rounded img-responsive image" src="/uploads/{{ image.path }}" alt="{{ image.name }}" />
 			  	<p>{{ image.description }}</p>  
 			  </div>
+			  <div class="panel-footer">
+			  	<a href="{{ url_for('delete_image', image_id=image.id) }}" class="btn btn-danger" role="button">Delete</a>
+		  	</div>
 			</div>
 		</div>
 	</div>

@@ -317,7 +317,17 @@ def image(image_id):
 	image = Image.query.get(image_id)
 	if current_user != image.trip.user:
 		return redirect('index')
-	return render_template("image.html", user=current_user, image=image) 
+	return render_template("image.html", user=current_user, image=image)
+
+@app.route('/trip/image/<int:image_id>/delete')
+@login_required
+def delete_image(image_id):
+	image = Image.query.get(image_id)
+	trip = image.trip
+	db.session.delete(image)
+	db.session.commit()
+	flash('The image was successfully deleted.')
+	return redirect(url_for('trip', trip_id = trip.id))
 
 def get_location(query):
 	""" Returns a tuple containing the latitude and longitude of the result. 
