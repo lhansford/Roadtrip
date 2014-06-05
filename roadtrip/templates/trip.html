@@ -62,6 +62,7 @@
 				<form action="" method=post enctype=multipart/form-data>
       		<input type=file name=file>
       		<input name="Day" type="hidden" value="" id="upload-day">
+      		<input name="DayNumber" type="hidden" value="" id="upload-day-num">
          	<input type=submit value=Upload>
         </form>
 			</div>
@@ -132,6 +133,7 @@
 				markerLayer = L.layerGroup(markers).addTo(map);
 				//Set upload day
 				$("#upload-day").val("");
+				$("#upload-day-num").val("");
 				//Set visibile images
 				setDisplayedImages();
 				active.removeClass('active');
@@ -160,6 +162,7 @@
 			markerLayer = L.layerGroup(markers).addTo(map);
 			//Set upload day
 			$("#upload-day").val(day.id);
+			$("#upload-day-num").val(index+1);
 			//Set visibile images
 			setDisplayedImages(day.id);
 			active.removeClass('active');
@@ -184,10 +187,6 @@
 			$(newDay).click(dayClicked);
 			reloadRouteData();
 		});
-	}
-	
-	function reloadRouteData(){
-		//Reload the data.
 	}
 
 	function setDisplayedImages(dayId){

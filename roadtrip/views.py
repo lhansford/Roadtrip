@@ -31,10 +31,13 @@ def trip(trip_id, day_num):
 	if request.method == 'POST':
 		upload = request.files['file']
 		day_id = request.form['Day']
+		day_num = request.form['DayNumber']
 		try:
 			day = Day.query.get(int(day_id))
+			day_num = int(day_num)
 		except:
 			day = None
+			day_num = None
 		if upload and allowed_file(upload.filename):
 			image = Image(
 				name = upload.filename,
@@ -43,8 +46,7 @@ def trip(trip_id, day_num):
 				upload_date = datetime.today(),
 				user = current_user,
 				trip = Trip.query.get(trip_id),
-				day = day,
-				day_num = day_num
+				day = day
 			)
 			db.session.add(image)
 			db.session.flush()
@@ -53,7 +55,7 @@ def trip(trip_id, day_num):
 			upload.save(os.path.join(app.config['UPLOAD_DIR'], filename))
 			image.path = filename
 			db.session.commit()
-			return redirect(url_for('trip', trip_id=trip_id))
+			return redirect(url_for('trip', trip_id=trip_id, day_num=day_num))
 	trip = Trip.query.get(trip_id)
 	days = Day.query.filter_by(trip=trip).order_by(Day.date).all()
 	trip_data = get_trip_data(days)
@@ -146,33 +148,33 @@ def new_trip():
 		user=current_user,
 		title="Start a new Roadtrip!")
 
-@app.route('/trip/<int:trip_id>/<int:day_num>')
-@login_required
-def day(trip_id, day_num):
-	""" Loads a particular day of a trip """
-	trip = Trip.query.get(trip_id)
-	days = Day.query.filter_by(trip=trip).order_by(Day.date).limit(day_num).all()
-	if len(days) != day_num:
-		return "ERROR"
-	day = days[-1]
-	locations = [{'latitude':l.latitude, 'longitude':l.longitude, 'name':l.name} for l in Location.query.filter_by(day=day).order_by(Location.order).all()]
-	if len(locations) > 1:
-		route = get_route(locations)
-		centroid, zoom = get_route_centroid(route)
-	else:
-		route = None
-		centroid = (locations[0]['latitude'],locations[0]['longitude'])
-		zoom = 3
-	return render_template("day.html",
-		trip=trip,
-		day=day,
-		day_num=day_num, 
-		locations=locations, 
-		route=route,
-		centroid=centroid,
-		zoom=zoom,
-		user=current_user,
-	)
+# @app.route('/trip/<int:trip_id>/<int:day_num>')
+# @login_required
+# def day(trip_id, day_num):
+# 	""" Loads a particular day of a trip """
+# 	trip = Trip.query.get(trip_id)
+# 	days = Day.query.filter_by(trip=trip).order_by(Day.date).limit(day_num).all()
+# 	if len(days) != day_num:
+# 		return "ERROR"
+# 	day = days[-1]
+# 	locations = [{'latitude':l.latitude, 'longitude':l.longitude, 'name':l.name} for l in Location.query.filter_by(day=day).order_by(Location.order).all()]
+# 	if len(locations) > 1:
+# 		route = get_route(locations)
+# 		centroid, zoom = get_route_centroid(route)
+# 	else:
+# 		route = None
+# 		centroid = (locations[0]['latitude'],locations[0]['longitude'])
+# 		zoom = 3
+# 	return render_template("day.html",
+# 		trip=trip,
+# 		day=day,
+# 		day_num=day_num, 
+# 		locations=locations, 
+# 		route=route,
+# 		centroid=centroid,
+# 		zoom=zoom,
+# 		user=current_user,
+# 	)
 
 @app.route('/trip/<int:trip_id>/edit')
 @login_required
@@ -187,20 +189,20 @@ def edit_trip(trip_id):
 	trip_data = get_trip_data(days)
 	return render_template("edit_trip.html", trip=trip, days=trip_data)
 
-@app.route('/trip/<int:trip_id>/<int:day_num>/edit')
-@login_required
-def edit_day(trip_id, day_num):
-	""" Edit a given road trip. """
-	trip = Trip.query.get(trip_id)
-	#Redirect if not the current user
-	if current_user != trip.user:
-		return redirect('index')
-	days = Day.query.filter_by(trip=trip).order_by(Day.date).limit(day_num).all()
-	if len(days) != day_num:
-		return "ERROR"
-	day = days[-1]
-	locations = Location.query.filter_by(day=day).order_by(Location.order).all()
-	return render_template("edit_day.html", trip=trip, day=day, day_num=day_num, locations=locations, user=current_user)
+# @app.route('/trip/<int:trip_id>/<int:day_num>/edit')
+# @login_required
+# def edit_day(trip_id, day_num):
+# 	""" Edit a given road trip. """
+# 	trip = Trip.query.get(trip_id)
+# 	#Redirect if not the current user
+# 	if current_user != trip.user:
+# 		return redirect('index')
+# 	days = Day.query.filter_by(trip=trip).order_by(Day.date).limit(day_num).all()
+# 	if len(days) != day_num:
+# 		return "ERROR"
+# 	day = days[-1]
+# 	locations = Location.query.filter_by(day=day).order_by(Location.order).all()
+# 	return render_template("edit_day.html", trip=trip, day=day, day_num=day_num, locations=locations, user=current_user)
 
 @app.route('/trip/<int:trip_id>/_add_day')
 @login_required
