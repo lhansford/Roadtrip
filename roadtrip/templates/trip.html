@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block css %}
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
-	<link rel="stylesheet" type="text/css" href="/static/css/elastislide.css" />
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/elastislide.css') }}" />
 	<style type="text/css">
 		#map { height: 480px; }	
 		.elastislide-vertical {
@@ -110,7 +110,7 @@
 			//Add location markers to map
 			for(var i = 0; i < totalRoute.locations.length; i++ ){
 				var l = totalRoute.locations[i];
-				markers.push(L.marker([l.latitude, l.longitude]).bindPopup(l.name));
+				markers.push(createMarker(l.latitude, l.longitude, l.name));
 			}
 			markerLayer.clearLayers();
 			markerLayer = L.layerGroup(markers).addTo(map);
@@ -128,7 +128,7 @@
 				markers = [];
 				for(var i = 0; i < totalRoute.locations.length; i++ ){
 					var l = totalRoute.locations[i];
-					markers.push(L.marker([l.latitude, l.longitude]).bindPopup(l.name));
+					markers.push(createMarker(l.latitude, l.longitude, l.name));
 				}
 				markerLayer = L.layerGroup(markers).addTo(map);
 				//Set upload day
@@ -157,7 +157,7 @@
 			markers = [];
 			for(var i = 0; i < day.locations.length; i++ ){
 				var l = day.locations[i];
-				markers.push(L.marker([l.latitude, l.longitude]).bindPopup(l.name));
+				
 			}
 			markerLayer = L.layerGroup(markers).addTo(map);
 			//Set upload day
@@ -171,11 +171,10 @@
 		};
 	}
 	
-
 	function createMarker(lat, lng, name){
-			L.marker([lat, lng]).addTo(map)
-		    .bindPopup(name);
-		}
+		var string = "<h5>" + name + "</h5>";
+		return L.marker([lat, lng]).bindPopup(string);
+	}
 
 	function addDay(){
 		var lastTab = $("#add-day");
@@ -185,7 +184,6 @@
 			var html = '<li class="trip-day" data-id="' + data.num + '"><a>Day ' + data.num + '</a></li>';
 			var newDay = $(html).insertBefore(lastTab);
 			$(newDay).click(dayClicked);
-			reloadRouteData();
 		});
 	}
 

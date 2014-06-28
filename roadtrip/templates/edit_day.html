@@ -1,11 +1,5 @@
-<style type="text/css">
-	.delete-location{
-		float:right;
-		position: relative;
-		top: -7px;
-	}
-</style>
-<script type="text/javascript" src="/static/js/sortable.min.js"></script>
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/sortable.min.js') }}"></script>
 <div class="modal-header">
   <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
   <h4 class="modal-title" id="myModalLabel">{{ trip.name }} - Day {{ day_num }}</h4>
@@ -15,7 +9,7 @@
 		<div class="col-md-12">
 			<ul class="list-group" id="locations">
 				{% for location in locations %}
-					<li class="list-group-item" data-id="{{ location.id }}">
+					<li class="list-group-item location" data-id="{{ location.id }}">
 						{{ location.name }}
 						<button class="delete-location btn btn-default">Remove</button>
 					</li>

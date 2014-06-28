@@ -7,7 +7,7 @@
 {% endblock %}
 {% block js %}
 	<script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
-	<script src="/static/js/leaflet-providers.js"></script>
+	<script src="{{ url_for('static', filename='js/leaflet-providers.js') }}"></script>
 {% endblock %}
 {% block content %}
 	<h1>{{ trip.name }} - Day {{ day_num }}</h1>

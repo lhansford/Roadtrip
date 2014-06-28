@@ -5,11 +5,11 @@
     {% else %}
     <title>NO TITLE BRO</title>
     {% endif %}
-    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/css/style.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     {% block css %}{% endblock %}
-    <script src="/static/js/jquery.min.js"></script>
-     <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+     <script src="{{ url_for('static', filename='bootstrap/js/bootstrap.min.js') }}"></script>
     {% block js %}{% endblock %}
   </head>
   <body>
@@ -31,7 +31,7 @@
       {% with messages = get_flashed_messages() %}
       {% if messages %}
       <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-6 col-md-offset-3">
           <div class="alert alert-info">
             <ul>
             {% for message in messages %}

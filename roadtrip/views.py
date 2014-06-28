@@ -94,7 +94,8 @@ def trip_settings(trip_id):
 	return render_template("trip_settings.html",
 		trip=trip,
 		form=form,
-		user=current_user)
+		user=current_user,
+		title="Trip Settings")
 
 @app.route('/trip/<int:trip_id>/delete')
 @login_required

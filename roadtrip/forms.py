@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import flash
 from flask.ext.wtf import Form
 from flask.ext.security import current_user
-from wtforms import TextField, FieldList, FormField, DateField, RadioField
+from wtforms import TextField, FieldList, FormField, DateField, SelectField
 from wtforms.validators import Required, Length, Optional
 
 from .models import Trip
@@ -41,8 +41,34 @@ class TripForm(Form):
 
 class TripSettingsForm(Form):
 	name = TextField('Name', validators = [Required(), Length(max=255)])
-	tileset = RadioField('Tileset', choices=[
-		('Stamen.Watercolor','Stamen Watercolor'),
+	tileset = SelectField('Tileset', choices=[
 		('OpenStreetMap.Mapnik','OpenStreetMap Mapnik'),
+		('OpenStreetMap.BlackAndWhite','OpenStreetMap Black and White'),
+		('OpenStreetMap.DE','OpenStreetMap DE'),
+		('OpenStreetMap.HOT','OpenStreetMap HOT'),
+		('Stamen.Watercolor','Stamen Watercolor'),
+		('Stamen.Toner','Stamen Toner'),
+		('Stamen.TonerLite','Stamen Toner Lite'),
+		('Thunderforest.OpenCycleMap','Thunderforest Open Cycle Map'),
+		('Thunderforest.Transport','Thunderforest Transport'),
+		('Thunderforest.Landscape','Thunderforest Landscape'),
+		('Thunderforest.Outdoors','Thunderforest Outdoors'),
+		('OpenMapSurfer.Mapnik','OpenMapSurfer Roads'),
+		('OpenMapSurfer.Mapnik','OpenMapSurfer Grayscale'),
+		('Hydda.Full','Hydda'),
+		('MapQuestOpen.OSM','MapQuest OSM'),
+		('MapQuestOpen.Aerial','MapQuest Aerial'),
+		('Esri.WorldStreetMap','Esri WorldStreetMap'),
+		('Esri.DeLorme','Esri DeLorme'),
 		('Esri.WorldTopoMap','Esri WorldTopoMap'),
+		('Esri.WorldImagery','Esri WorldImagery'),
+		('Esri.WorldTerrain','Esri WorldTerrain'),
+		('Esri.WorldShadedRelief','Esri WorldShadedRelief'),
+		('Esri.WorldPhysical','Esri WorldPhysical'),
+		('Esri.OceanBasemap','Esri OceanBasemap'),
+		('Esri.NatGeoWorldMap','Esri NatGeoWorldMap'),
+		('Esri.WorldGrayCanvas','Esri WorldGrayCanvas'),
+		('Acetate.all','Acetate'),
+		('Esri.NatGeoWorldMap','Esri NatGeoWorldMap'),
+		('Esri.WorldGrayCanvas','Esri WorldGrayCanvas'),
 	])

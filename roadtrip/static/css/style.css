@@ -5,3 +5,24 @@
 .nav-tabs a {
 	cursor: pointer;
 }
+
+/* EDIT DAY*/
+
+.location {
+	cursor: move;
+	cursor: -webkit-grab;
+	cursor: -moz-grab;
+}
+
+.location:active{
+	cursor: move;
+	cursor: -webkit-grabbing;
+	cursor: -moz-grabbing;
+}
+
+
+.delete-location{
+	float:right;
+	position: relative;
+	top: -7px;
+}
