@@ -149,18 +149,18 @@ def new_trip():
 		user=current_user,
 		title="Start a new Roadtrip!")
 
-@app.route('/trip/<int:trip_id>/edit')
-@login_required
-def edit_trip(trip_id):
-	""" Edit a given road trip. """
+# @app.route('/trip/<int:trip_id>/edit')
+# @login_required
+# def edit_trip(trip_id):
+# 	""" Edit a given road trip. """
 
-	trip = Trip.query.get(trip_id)
-	#Redirect if not the current user
-	if current_user != trip.user:
-		return redirect('index')
-	days = Day.query.filter_by(trip=trip).order_by(Day.date).all()
-	trip_data = get_trip_data(days)
-	return render_template("edit_trip.html", trip=trip, days=trip_data)
+# 	trip = Trip.query.get(trip_id)
+# 	#Redirect if not the current user
+# 	if current_user != trip.user:
+# 		return redirect('index')
+# 	days = Day.query.filter_by(trip=trip).order_by(Day.date).all()
+# 	trip_data = get_trip_data(days)
+# 	return render_template("edit_trip.html", trip=trip, days=trip_data)
 
 @app.route('/trip/<int:trip_id>/<int:day_num>/edit')
 @login_required

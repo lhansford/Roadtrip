@@ -157,7 +157,7 @@
 			markers = [];
 			for(var i = 0; i < day.locations.length; i++ ){
 				var l = day.locations[i];
-				
+				markers.push(createMarker(l.latitude, l.longitude, l.name));
 			}
 			markerLayer = L.layerGroup(markers).addTo(map);
 			//Set upload day
